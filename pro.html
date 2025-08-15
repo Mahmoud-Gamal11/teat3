@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQXR0ZW5kYW5jZSBQcm8iLCJzaG9ydF9uYW1lIjoiQXR0ZW5kIiwic3RhcnRfdXJsIjoiL2luZGV4Lmh0bWwiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsInRoZW1lX2NvbG9yIjoiIzAwN2JmZiIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3BsYWNlaG9sZC5pdC8xOTIvcG5nIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
+    <link rel="stylesheet" href="main.css">
+    
+</head>
+<body class="font-sans">
+    <div id="notification" class="notification hidden"></div>
+
+    <header class="bg-blue-600 text-white p-4 shadow-lg">
+        <h1 class="text-3xl font-bold text-center">Employee Attendance</h1>
+    </header>
+
+    <nav id="nav" class="hidden bg-white dark:bg-gray-800 p-4 shadow sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-around flex-wrap gap-2">
+            <button class="px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg font-medium" onclick="showSection('home')">Home</button>
+            <button class="px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg font-medium" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg font-medium" onclick="showSection('reports')">Reports</button>
+            <button id="user-mgmt-btn" class="px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg font-medium hidden" onclick="showSection('user-management')">User Management</button>
+            <button class="px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg font-medium" onclick="showSection('settings')">Settings</button>
+            <button id="integrations-btn" class="px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg font-medium hidden" onclick="showSection('integrations')">Integrations</button>
+            <button id="subscription-btn" class="px-4 py-2 hover:bg-blue-500 hover:text-white rounded-lg font-medium hidden" onclick="showSection('subscription')">Subscription</button>
+            <button class="px-4 py-2 hover:bg-red-500 hover:text-white rounded-lg font-medium" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <section id="home" class="hidden hero p-16 text-center">
+        <div class="hero-content max-w-4xl mx-auto">
+            <h2 class="text-4xl font-bold mb-4">Employee Attendance </h2>
+            <p class="text-xl mb-6 font-medium">Effortlessly track employee attendance with real-time monitoring, advanced analytics, and seamless HR integrations.</p>
+            <button class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium" onclick="showSection('signup-section')">Get Started</button>
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-2">Features</h3>
+                    <ul class="list-disc list-inside text-left">
+                        <li>Geolocation-based check-in/check-out</li>
+                        <li>Custom reports and analytics</li>
+                        <li>HR system integrations (BambooHR, SAP)</li>
+                        <li>Subscription plans: Basic ($50/month), Premium ($200/month)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-semibold mb-2">Pricing</h3>
+                    <p class="text-left">Basic: 50 users - $50/month</p>
+                    <p class="text-left">Premium: Unlimited + Analytics - $200/month</p>
+                    <div class="mt-4 text-left">
+                        <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline" onclick="showSection('privacy')">Privacy Policy</a> | 
+                        <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline" onclick="showSection('terms')">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="login-section" class="p-8 max-w-md mx-auto">
+        <h2 class="text-2xl font-bold mb-4">Login</h2>
+        <form id="login-form" class="space-y-4">
+            <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+            <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg relative font-medium">
+                Login
+                <div id="login-spinner" class="spinner absolute right-4 top-1/2 -translate-y-1/2"></div>
+            </button>
+        </form>
+        <p class="mt-4">Forgot password? <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline">Reset</a></p>
+        <p>Don't have an account? <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline" onclick="showSection('signup-section')">Sign Up</a></p>
+    </section>
+
+    <section id="signup-section" class="hidden p-8 max-w-md mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
+        <form id="signup-form" class="space-y-4">
+            <input type="email" id="signup-email" placeholder="Email" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+            <input type="password" id="signup-password" placeholder="Password" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+            <select id="signup-role" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+                <option value="">Select Role</option>
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+                <option value="super_admin">Super Admin</option>
+            </select>
+            <input type="text" id="signup-company" placeholder="Company Name" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg relative font-medium">
+                Create Account
+                <div id="signup-spinner" class="spinner absolute right-4 top-1/2 -translate-y-1/2"></div>
+            </button>
+        </form>
+        <p class="mt-4">Already have an account? <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline" onclick="showSection('login-section')">Login</a></p>
+    </section>
+
+    <section id="dashboard" class="hidden p-8 max-w-4xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">Dashboard</h2>
+        <p class="text-lg">Welcome, <span id="user-name"></span>! Role: <span id="user-role"></span></p>
+        <div class="flex space-x-4 my-4">
+            <button onclick="checkIn()" class="bg-green-600 text-white px-4 py-2 rounded-lg relative font-medium">
+                Check In
+                <div id="checkin-spinner" class="spinner inline-block ml-2"></div>
+            </button>
+            <button onclick="checkOut()" class="bg-red-600 text-white px-4 py-2 rounded-lg relative font-medium">
+                Check Out
+                <div id="checkout-spinner" class="spinner inline-block ml-2"></div>
+            </button>
+        </div>
+        <p id="status" class="text-green-600 font-bold"></p>
+        <h3 class="text-xl mt-6 font-semibold">Quick Stats</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="card">
+                <p>Hours This Week: <span id="hours-this-week">0</span></p>
+            </div>
+            <div class="card">
+                <p>Last Check-In: <span id="last-checkin">Not Available</span></p>
+            </div>
+        </div>
+        <h3 class="text-xl mt-6 font-semibold">Attendance Logs</h3>
+        <table class="w-full border-collapse bg-white dark:bg-gray-800">
+            <thead>
+                <tr class="table-header">
+                    <th class="border p-3">Action</th>
+                    <th class="border p-3">Time</th>
+                    <th class="border p-3">Location</th>
+                    <th class="border p-3">Hours</th>
+                </tr>
+            </thead>
+            <tbody id="personal-logs"></tbody>
+        </table>
+        <div id="calendar" class="mt-6 card">Calendar Placeholder (Use FullCalendar in production)</div>
+    </section>
+
+    <section id="reports" class="hidden p-8 max-w-5xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">Reports</h2>
+        <div class="card mb-6">
+            <h3 class="text-xl font-semibold mb-4">Summary</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <p>Total Hours: <span id="total-hours">0</span></p>
+                <p>Attendance Rate: <span id="attendance-rate">0%</span></p>
+                <p>Active Users: <span id="active-users">0</span></p>
+            </div>
+        </div>
+        <form id="reports-filter" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <input type="date" id="report-start" class="p-3 border rounded dark:bg-gray-700 dark:text-white">
+            <input type="date" id="report-end" class="p-3 border rounded dark:bg-gray-700 dark:text-white">
+            <select id="report-dept" class="p-3 border rounded dark:bg-gray-700 dark:text-white">
+                <option value="">All Departments</option>
+                <option value="HR">HR</option>
+                <option value="IT">IT</option>
+            </select>
+            <select id="report-user" class="p-3 border rounded dark:bg-gray-700 dark:text-white">
+                <option value="">All Users</option>
+            </select>
+            <button type="button" onclick="filterReports()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Filter</button>
+        </form>
+        <div class="flex space-x-4 mb-6">
+            <select id="sort-reports" class="p-3 border rounded dark:bg-gray-700 dark:text-white">
+                <option value="date-desc">Sort by Date (Newest)</option>
+                <option value="date-asc">Sort by Date (Oldest)</option>
+                <option value="user">Sort by User</option>
+                <option value="action">Sort by Action</option>
+            </select>
+            <button onclick="filterReports()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Sort</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="attendance-chart"></canvas>
+        </div>
+        <table class="w-full border-collapse bg-white dark:bg-gray-800">
+            <thead>
+                <tr class="table-header">
+                    <th class="border p-3">User</th>
+                    <th class="border p-3">Action</th>
+                    <th class="border p-3">Time</th>
+                    <th class="border p-3">Location</th>
+                    <th class="border p-3">Hours</th>
+                </tr>
+            </thead>
+            <tbody id="reports-table"></tbody>
+        </table>
+        <div class="mt-6 flex space-x-4">
+            <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Export CSV</button>
+            <button onclick="exportPDF()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Export PDF</button>
+            <button onclick="downloadFilteredReports()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Download Filtered Report</button>
+        </div>
+    </section>
+
+    <section id="user-management" class="hidden p-8 max-w-4xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">User Management</h2>
+        <form id="add-user-form" class="space-y-4 mb-6">
+            <input type="email" id="add-email" placeholder="Email" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+            <input type="password" id="add-password" placeholder="Password" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+            <select id="add-role" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white" required>
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+            </select>
+            <input type="text" id="add-dept" placeholder="Department" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Add User</button>
+        </form>
+        <table class="w-full border-collapse bg-white dark:bg-gray-800">
+            <thead>
+                <tr class="table-header">
+                    <th class="border p-3">Email</th>
+                    <th class="border p-3">Role</th>
+                    <th class="border p-3">Department</th>
+                    <th class="border p-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-table"></tbody>
+        </table>
+        <button onclick="bulkImport()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Bulk Import CSV</button>
+    </section>
+
+    <section id="settings" class="hidden p-8 max-w-4xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">Settings</h2>
+        <h3 class="text-xl font-semibold">Personal</h3>
+        <form id="update-profile" class="space-y-4 mb-6">
+            <input type="password" id="new-password" placeholder="New Password" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Update Password</button>
+        </form>
+        <h3 class="text-xl font-semibold">Company</h3>
+        <form id="company-settings" class="space-y-4">
+            <input type="text" id="geofence" placeholder="Geofence (Latitude, Longitude)" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white">
+            <select id="timezone" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white">
+                <option>UTC</option>
+                <option>EST</option>
+                <option>GMT+2</option>
+            </select>
+            <input type="number" id="alert-threshold" placeholder="Late Alert Threshold (minutes)" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white">
+            <button type="button" onclick="saveCompanySettings()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Save</button>
+        </form>
+    </section>
+
+    <section id="integrations" class="hidden p-8 max-w-4xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">Integrations</h2>
+        <form class="space-y-4">
+            <input type="text" id="api-key" placeholder="HR API Key (BambooHR/SAP)" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white">
+            <div class="flex space-x-4">
+                <button type="button" onclick="connectHR()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Connect</button>
+                <button type="button" onclick="testConnection()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Test</button>
+            </div>
+        </form>
+        <p class="mt-4">Status: <span id="integration-status">Not Connected</span></p>
+    </section>
+
+    <section id="subscription" class="hidden p-8 max-w-4xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">Subscription</h2>
+        <p>Current Plan: <span id="current-plan">Basic</span></p>
+        <button onclick="upgradeSubscription()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Upgrade to Premium</button>
+        <form id="payment-form" class="space-y-4 mt-4">
+            <input type="text" placeholder="Card Number (Mock)" class="w-full p-3 border rounded dark:bg-gray-700 dark:text-white">
+            <button type="button" onclick="processPayment()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Pay with Stripe</button>
+        </form>
+    </section>
+
+    <section id="privacy" class="hidden p-8 max-w-4xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">Privacy Policy</h2>
+        <p>GDPR compliant. Location data encrypted. User consent required for geolocation.</p>
+    </section>
+
+    <section id="terms" class="hidden p-8 max-w-4xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">Terms of Service</h2>
+        <p>Use responsibly. SaaS model for businesses.</p>
+    </section>
+
+    <section id="error-404" class="hidden p-8 max-w-4xl mx-auto animate-in">
+        <h2 class="text-2xl font-bold mb-4">404 - Page Not Found</h2>
+        <p>Back to <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline" onclick="showSection('home')">Home</a></p>
+    </section>
+
+    <button id="dark-mode-toggle" class="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700" onclick="toggleDarkMode()">🌙</button>
+
+    <footer class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 p-4 text-center">
+        &copy; 2025 Attendance Pro | <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline" onclick="showSection('privacy')">Privacy Policy</a> | 
+        <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline" onclick="showSection('terms')">Terms of Service</a>
+    </footer>
+
+    <script>
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('users')) || [
+            { id: 1, email: 'admin@test.com', password: 'password123', role: 'super_admin', company: 'TestCorp', department: '' }
+        ];
+        let logs = JSON.parse(localStorage.getItem('logs')) || [
+            { user_id: 1, action: 'check-in', latitude: 30.123, longitude: 31.456, timestamp: '2025-08-14T09:00:00Z', hours_worked: null },
+            { user_id: 1, action: 'check-out', latitude: 30.123, longitude: 31.456, timestamp: '2025-08-14T17:00:00Z', hours_worked: 8 }
+        ];
+        let companySettings = JSON.parse(localStorage.getItem('companySettings')) || {
+            geofence: '30.123,31.456',
+            timezone: 'GMT+2',
+            alertThreshold: 15,
+            subscription: 'Basic'
+        };
+
+        // Initialize dark mode
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark');
+            document.getElementById('dark-mode-toggle').textContent = '☀️';
+        }
+
+        // GSAP animations
+        function animateSection(section) {
+            gsap.from(section, { opacity: 0, y: 50, duration: 0.8, ease: 'power3.out' });
+            gsap.from(section.querySelectorAll('h2, p, button, .card'), {
+                opacity: 0,
+                y: 20,
+                duration: 0.6,
+                stagger: 0.1,
+                ease: 'power2.out',
+                delay: 0.2
+            });
+        }
+
+        // On-page notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.remove('hidden');
+            gsap.fromTo(notification, 
+                { opacity: 0, y: -20 }, 
+                { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', onComplete: () => {
+                    setTimeout(() => {
+                        gsap.to(notification, { 
+                            opacity: 0, 
+                            y: -20, 
+                            duration: 0.5, 
+                            ease: 'power3.in', 
+                            onComplete: () => notification.classList.add('hidden') 
+                        });
+                    }, 3000);
+                }
+            });
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(s => {
+                s.classList.add('hidden');
+                s.classList.remove('animate-in');
+            });
+            const target = document.getElementById(sectionId);
+            if (target) {
+                target.classList.remove('hidden');
+                animateSection(target);
+            } else {
+                document.getElementById('error-404').classList.remove('hidden');
+                animateSection(document.getElementById('error-404'));
+            }
+            document.getElementById('nav').classList.toggle('hidden', ['login-section', 'signup-section', 'home'].includes(sectionId));
+            if (currentUser) {
+                document.getElementById('user-mgmt-btn').classList.toggle('hidden', !['admin', 'super_admin'].includes(currentUser.role));
+                document.getElementById('integrations-btn').classList.toggle('hidden', !['admin', 'super_admin'].includes(currentUser.role));
+                document.getElementById('subscription-btn').classList.toggle('hidden', currentUser.role !== 'super_admin');
+                if (sectionId === 'reports' && ['manager', 'admin', 'super_admin'].includes(currentUser.role)) {
+                    populateUserFilter();
+                    loadReports();
+                }
+            }
+        }
+
+        function showSpinner(id) {
+            document.getElementById(id).style.display = 'block';
+        }
+        function hideSpinner(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            showSpinner('login-spinner');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            setTimeout(() => {
+                const user = users.find(u => u.email === email && u.password === password);
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    document.getElementById('user-name').textContent = user.email;
+                    document.getElementById('user-role').textContent = user.role;
+                    document.getElementById('current-plan').textContent = companySettings.subscription;
+                    loadPersonalLogs();
+                    calculateStats();
+                    if (['manager', 'admin', 'super_admin'].includes(user.role)) {
+                        loadReports();
+                    }
+                    if (['admin', 'super_admin'].includes(user.role)) {
+                        loadUsers();
+                    }
+                    showSection('dashboard');
+                    showNotification('Login successful', 'success');
+                } else {
+                    showNotification('Invalid credentials', 'error');
+                }
+                hideSpinner('login-spinner');
+            }, 1000);
+        });
+
+        // Signup
+        document.getElementById('signup-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            showSpinner('signup-spinner');
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const role = document.getElementById('signup-role').value;
+            const company = document.getElementById('signup-company').value;
+            setTimeout(() => {
+                if (users.find(u => u.email === email)) {
+                    showNotification('Email already exists', 'error');
+                } else {
+                    const newUser = { id: users.length + 1, email, password, role, company, department: '' };
+                    users.push(newUser);
+                    localStorage.setItem('users', JSON.stringify(users));
+                    showNotification('Account created successfully! Please log in.', 'success');
+                    showSection('login-section');
+                }
+                hideSpinner('signup-spinner');
+            }, 1000);
+        });
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            showSection('home');
+            showNotification('Logged out', 'success');
+        }
+
+        // Check In
+        function checkIn() {
+            showSpinner('checkin-spinner');
+            getLocation(pos => {
+                const log = {
+                    user_id: currentUser.id,
+                    action: 'check-in',
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    timestamp: new Date().toISOString(),
+                    hours_worked: null
+                };
+                logs.push(log);
+                localStorage.setItem('logs', JSON.stringify(logs));
+                document.getElementById('status').textContent = `Checked in at ${new Date().toLocaleString()}`;
+                loadPersonalLogs();
+                calculateStats();
+                showNotification(`Checked in at (${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)})`, 'success');
+                hideSpinner('checkin-spinner');
+            });
+        }
+
+        // Check Out
+        function checkOut() {
+            showSpinner('checkout-spinner');
+            getLocation(pos => {
+                const lastCheckIn = logs.filter(l => l.user_id === currentUser.id && l.action === 'check-in')
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                let hoursWorked = null;
+                if (lastCheckIn) {
+                    hoursWorked = (new Date() - new Date(lastCheckIn.timestamp)) / (1000 * 60 * 60);
+                }
+                const log = {
+                    user_id: currentUser.id,
+                    action: 'check-out',
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    timestamp: new Date().toISOString(),
+                    hours_worked: hoursWorked
+                };
+                logs.push(log);
+                localStorage.setItem('logs', JSON.stringify(logs));
+                document.getElementById('status').textContent = `Checked out at ${new Date().toLocaleString()}`;
+                loadPersonalLogs();
+                calculateStats();
+                showNotification(`Checked out at (${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)})`, 'success');
+                hideSpinner('checkout-spinner');
+            });
+        }
+
+        function getLocation(callback) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    callback,
+                    () => {
+                        callback({ coords: { latitude: 30.123, longitude: 31.456 } });
+                    }
+                );
+            } else {
+                callback({ coords: { latitude: 30.123, longitude: 31.456 } });
+            }
+        }
+
+        // Load personal logs
+        function loadPersonalLogs() {
+            const tbody = document.getElementById('personal-logs');
+            tbody.innerHTML = '';
+            logs.filter(l => l.user_id === currentUser.id).forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = 'dark:bg-gray-800';
+                tr.innerHTML = `<td class="border p-3">${log.action}</td><td class="border p-3">${new Date(log.timestamp).toLocaleString()}</td><td class="border p-3">${log.latitude}, ${log.longitude}</td><td class="border p-3">${log.hours_worked?.toFixed(2) || ''}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Calculate stats
+        function calculateStats() {
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            const userLogs = logs.filter(l => l.user_id === currentUser.id && new Date(l.timestamp) >= weekStart);
+            const hoursThisWeek = userLogs.reduce((sum, log) => sum + (log.hours_worked || 0), 0);
+            const lastCheckIn = userLogs.find(l => l.action === 'check-in')?.timestamp;
+            document.getElementById('hours-this-week').textContent = hoursThisWeek.toFixed(2);
+            document.getElementById('last-checkin').textContent = lastCheckIn ? new Date(lastCheckIn).toLocaleString() : 'Not Available';
+        }
+
+        // Populate user filter for reports
+        function populateUserFilter() {
+            const userSelect = document.getElementById('report-user');
+            userSelect.innerHTML = '<option value="">All Users</option>';
+            users.filter(u => u.company === currentUser.company).forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.email;
+                userSelect.appendChild(option);
+            });
+        }
+
+        // Load reports
+        function loadReports(filteredLogs = null) {
+            if (!['manager', 'admin', 'super_admin'].includes(currentUser.role)) {
+                showNotification('Unauthorized', 'error');
+                return;
+            }
+            const displayLogs = filteredLogs || logs.filter(l => users.find(u => u.id === l.user_id).company === currentUser.company);
+            const tbody = document.getElementById('reports-table');
+            tbody.innerHTML = '';
+            displayLogs.forEach(log => {
+                const user = users.find(u => u.id === log.user_id);
+                const tr = document.createElement('tr');
+                tr.className = 'dark:bg-gray-800';
+                tr.innerHTML = `<td class="border p-3">${user.email}</td><td class="border p-3">${log.action}</td><td class="border p-3">${new Date(log.timestamp).toLocaleString()}</td><td class="border p-3">${log.latitude}, ${log.longitude}</td><td class="border p-3">${log.hours_worked?.toFixed(2) || ''}</td>`;
+                tbody.appendChild(tr);
+            });
+            updateReportSummary(displayLogs);
+            drawChart(displayLogs);
+        }
+
+        // Update report summary
+        function updateReportSummary(logs) {
+            const totalHours = logs.reduce((sum, log) => sum + (log.hours_worked || 0), 0);
+            const userIds = [...new Set(logs.map(l => l.user_id))];
+            const activeUsers = userIds.length;
+            const checkIns = logs.filter(l => l.action === 'check-in').length;
+            const totalActions = logs.length;
+            const attendanceRate = totalActions > 0 ? ((checkIns / totalActions) * 100).toFixed(1) : 0;
+            document.getElementById('total-hours').textContent = totalHours.toFixed(2);
+            document.getElementById('attendance-rate').textContent = `${attendanceRate}%`;
+            document.getElementById('active-users').textContent = activeUsers;
+        }
+
+        // Filter and sort reports
+        function filterReports() {
+            const start = document.getElementById('report-start').value;
+            const end = document.getElementById('report-end').value;
+            const dept = document.getElementById('report-dept').value;
+            const userId = document.getElementById('report-user').value;
+            const sort = document.getElementById('sort-reports').value;
+            let filteredLogs = logs.filter(l => users.find(u => u.id === l.user_id).company === currentUser.company);
+            if (start) filteredLogs = filteredLogs.filter(l => new Date(l.timestamp) >= new Date(start));
+            if (end) filteredLogs = filteredLogs.filter(l => new Date(l.timestamp) <= new Date(end));
+            if (dept) filteredLogs = filteredLogs.filter(l => users.find(u => u.id === l.user_id).department === dept);
+            if (userId) filteredLogs = filteredLogs.filter(l => l.user_id === parseInt(userId));
+            if (sort === 'date-asc') {
+                filteredLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            } else if (sort === 'date-desc') {
+                filteredLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            } else if (sort === 'user') {
+                filteredLogs.sort((a, b) => users.find(u => u.id === a.user_id).email.localeCompare(users.find(u => u.id === b.user_id).email));
+            } else if (sort === 'action') {
+                filteredLogs.sort((a, b) => a.action.localeCompare(b.action));
+            }
+            loadReports(filteredLogs);
+        }
+
+        // Download filtered reports
+        function downloadFilteredReports() {
+            const start = document.getElementById('report-start').value;
+            const end = document.getElementById('report-end').value;
+            const dept = document.getElementById('report-dept').value;
+            const userId = document.getElementById('report-user').value;
+            let filteredLogs = logs.filter(l => users.find(u => u.id === l.user_id).company === currentUser.company);
+            if (start) filteredLogs = filteredLogs.filter(l => new Date(l.timestamp) >= new Date(start));
+            if (end) filteredLogs = filteredLogs.filter(l => new Date(l.timestamp) <= new Date(end));
+            if (dept) filteredLogs = filteredLogs.filter(l => users.find(u => u.id === l.user_id).department === dept);
+            if (userId) filteredLogs = filteredLogs.filter(l => l.user_id === parseInt(userId));
+            let csv = 'User,Action,Time,Latitude,Longitude,Hours Worked\n';
+            filteredLogs.forEach(log => {
+                const user = users.find(u => u.id === log.user_id);
+                csv += `${user.email},${log.action},${new Date(log.timestamp).toLocaleString()},${log.latitude},${log.longitude},${log.hours_worked?.toFixed(2) || ''}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'filtered-attendance-reports.csv';
+            a.click();
+            showNotification('Filtered report exported successfully', 'success');
+        }
+
+        // Chart
+        let chart;
+        function drawChart(logs) {
+            const ctx = document.getElementById('attendance-chart').getContext('2d');
+            if (chart) chart.destroy();
+            const dates = [...new Set(logs.map(l => new Date(l.timestamp).toLocaleDateString()))];
+            const hoursByDate = dates.map(d => {
+                return logs.filter(l => new Date(l.timestamp).toLocaleDateString() === d)
+                    .reduce((sum, l) => sum + (l.hours_worked || 0), 0);
+            });
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Work Hours',
+                        data: hoursByDate,
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Hours Worked',
+                                font: { family: 'Inter', size: 14 }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                thefont: { family: 'Inter', size: 14 }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                font: { family: 'Inter', size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1f2937',
+                            titleFont: { family: 'Inter' },
+                            bodyFont: { family: 'Inter' }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Export CSV
+        function exportCSV() {
+            if (!['manager', 'admin', 'super_admin'].includes(currentUser.role)) {
+                showNotification('Unauthorized', 'error');
+                return;
+            }
+            let csv = 'User,Action,Time,Latitude,Longitude,Hours Worked\n';
+            logs.filter(l => users.find(u => u.id === l.user_id).company === currentUser.company).forEach(log => {
+                const user = users.find(u => u.id === log.user_id);
+                csv += `${user.email},${log.action},${new Date(log.timestamp).toLocaleString()},${log.latitude},${log.longitude},${log.hours_worked?.toFixed(2) || ''}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'attendance-reports.csv';
+            a.click();
+            showNotification('CSV exported successfully', 'success');
+        }
+
+        // Export PDF (mock)
+        function exportPDF() {
+            showNotification('PDF export requires jsPDF in production', 'error');
+        }
+
+        // User Management
+        document.getElementById('add-user-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            if (!['admin', 'super_admin'].includes(currentUser.role)) {
+                showNotification('Unauthorized', 'error');
+                return;
+            }
+            const email = document.getElementById('add-email').value;
+            const password = document.getElementById('add-password').value;
+            const role = document.getElementById('add-role').value;
+            const dept = document.getElementById('add-dept').value;
+            if (users.find(u => u.email === email)) {
+                showNotification('Email already exists', 'error');
+                return;
+            }
+            users.push({ id: users.length + 1, email, password, role, company: currentUser.company, department: dept });
+            localStorage.setItem('users', JSON.stringify(users));
+            loadUsers();
+            showNotification('User added successfully', 'success');
+        });
+
+        function loadUsers() {
+            if (!['admin', 'super_admin'].includes(currentUser.role)) {
+                showNotification('Unauthorized', 'error');
+                return;
+            }
+            const tbody = document.getElementById('users-table');
+            tbody.innerHTML = '';
+            users.filter(u => u.company === currentUser.company).forEach(user => {
+                const tr = document.createElement('tr');
+                tr.className = 'dark:bg-gray-800';
+                tr.innerHTML = `<td class="border p-3">${user.email}</td><td class="border p-3">${user.role}</td><td class="border p-3">${user.department || ''}</td><td class="border p-3"><button class="bg-yellow-600 text-white px-2 py-1 rounded-lg font-medium" onclick="editUser('${user.email}')">Edit</button> <button class="bg-red-600 text-white px-2 py-1 rounded-lg font-medium" onclick="deleteUser('${user.email}')">Delete</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function editUser(email) {
+            showNotification(`Edit user ${email} - Implement in production`, 'error');
+        }
+
+        function deleteUser(email) {
+            if (!['admin', 'super_admin'].includes(currentUser.role)) {
+                showNotification('Unauthorized', 'error');
+                return;
+            }
+            users = users.filter(u => u.email !== email);
+            localStorage.setItem('users', JSON.stringify(users));
+            loadUsers();
+            showNotification('User deleted successfully', 'success');
+        }
+
+        function bulkImport() {
+            showNotification('Bulk CSV import - Implement file upload in production', 'error');
+        }
+
+        // Settings
+        document.getElementById('update-profile').addEventListener('submit', async e => {
+            e.preventDefault();
+            const password = document.getElementById('new-password').value;
+            if (password) {
+                const user = users.find(u => u.id === currentUser.id);
+                user.password = password;
+                localStorage.setItem('users', JSON.stringify(users));
+                showNotification('Password updated successfully', 'success');
+            }
+        });
+
+        function saveCompanySettings() {
+            companySettings.geofence = document.getElementById('geofence').value;
+            companySettings.timezone = document.getElementById('timezone').value;
+            companySettings.alertThreshold = document.getElementById('alert-threshold').value;
+            localStorage.setItem('companySettings', JSON.stringify(companySettings));
+            showNotification('Settings saved successfully', 'success');
+        }
+
+        // Integrations (mock)
+        function connectHR() {
+            if (!['admin', 'super_admin'].includes(currentUser.role)) {
+                showNotification('Unauthorized', 'error');
+                return;
+            }
+            document.getElementById('integration-status').textContent = 'Connected';
+            showNotification('HR integration successful (mock)', 'success');
+        }
+
+        function testConnection() {
+            showNotification('Test connection successful (mock)', 'success');
+        }
+
+        // Subscription
+        function upgradeSubscription() {
+            if (currentUser.role !== 'super_admin') {
+                showNotification('Unauthorized', 'error');
+                return;
+            }
+            companySettings.subscription = 'Premium';
+            localStorage.setItem('companySettings', JSON.stringify(companySettings));
+            document.getElementById('current-plan').textContent = 'Premium';
+            showNotification('Upgraded to Premium successfully', 'success');
+        }
+
+        function processPayment() {
+            showNotification('Payment processing via Stripe - Implement in production', 'error');
+        }
+
+        // Dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            document.getElementById('dark-mode-toggle').textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('darkMode', isDark);
+            showNotification(`Dark mode ${isDark ? 'enabled' : 'disabled'}`, 'success');
+        }
+
+        // PWA offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(() => {
+                console.log('Service Worker registered');
+            }).catch(err => console.error('Service Worker error:', err));
+        }
+
+        // Initial load
+        function init() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('user-name').textContent = currentUser.email;
+                document.getElementById('user-role').textContent = currentUser.role;
+                document.getElementById('current-plan').textContent = companySettings.subscription;
+                loadPersonalLogs();
+                calculateStats();
+                if (['manager', 'admin', 'super_admin'].includes(currentUser.role)) {
+                    loadReports();
+                }
+                if (['admin', 'super_admin'].includes(currentUser.role)) {
+                    loadUsers();
+                }
+                showSection('dashboard');
+            } else {
+                showSection('home');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
